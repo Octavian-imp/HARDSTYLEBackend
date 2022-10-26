@@ -1,12 +1,12 @@
 const uuid = require("uuid");
 const path = require("path");
-const { Product, ProductsInfo } = require("../models/models");
+const { Product, ProductsInfo, ProductSizes } = require("../models/models");
 const ApiError = require("../errors/ApiError");
 
 class ProductController {
   async create(req, res, next) {
     try {
-      let { name, price, categoryId, info } = req.body;
+      let { name, price, categoryId, sizes, info } = req.body;
       const { img } = req.files;
       let fileName = uuid.v4() + ".jpg";
       img.mv(path.resolve(__dirname, "..", "static", fileName));
@@ -22,6 +22,16 @@ class ProductController {
           ProductsInfo.create({
             title: i.title,
             description: i.description,
+            productId: product.id,
+          });
+        });
+      }
+      if (sizes) {
+        sizes = JSON.parse(sizes);
+        sizes.forEach((i) => {
+          ProductSizes.create({
+            size: i.size,
+            count: i.count,
             productId: product.id,
           });
         });
@@ -53,7 +63,10 @@ class ProductController {
     const { id } = req.params;
     const product = await Product.findOne({
       where: { id },
-      include: [{ model: ProductsInfo, as: "info" }],
+      include: [
+        { model: ProductsInfo, as: "info" },
+        { model: ProductSizes, as: "sizes" },
+      ],
     });
     return res.json(product);
   }

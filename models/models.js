@@ -36,6 +36,12 @@ const ProductsInfo = sequelize.define("products_info", {
   description: { type: DataTypes.STRING, allowNull: false },
 });
 
+const ProductSizes = sequelize.define("product_sizes", {
+  id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+  size: { type: DataTypes.STRING, allowNull: false },
+  count: { type: DataTypes.INTEGER, allowNull: false },
+});
+
 User.hasOne(Basket);
 Basket.belongsTo(User);
 
@@ -48,6 +54,9 @@ Product.belongsTo(BasketProduct);
 Product.hasMany(ProductsInfo, { as: "info" });
 ProductsInfo.belongsTo(Product);
 
+Product.hasMany(ProductSizes, { as: "sizes" });
+ProductSizes.belongsTo(Product);
+
 Category.hasMany(Product);
 Product.belongsTo(Category);
 
@@ -55,6 +64,7 @@ module.exports = {
   User,
   Product,
   ProductsInfo,
+  ProductSizes,
   Basket,
   BasketProduct,
   Category,
