@@ -62,6 +62,12 @@ class ProductController {
     }
     return res.json(products);
   }
+  async getAllCounts(req, res) {
+    let products = await Product.findAll({
+      include: [{ model: ProductSizes, as: "sizes" }],
+    });
+    return res.json(products);
+  }
   async getOne(req, res) {
     const { id } = req.params;
     const product = await Product.findOne({
