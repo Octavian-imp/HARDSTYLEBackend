@@ -46,16 +46,17 @@ class ProductController {
     }
   }
   async getAll(req, res) {
-    let { categoryId, limit, page } = req.query;
+    let { gender, limit, page } = req.query;
     page = page || 1;
     limit = limit || 12;
     let offset = page * limit - limit;
     let products;
-    if (!categoryId) {
+    // получение товаров по полу. Было по 'CategoryId'
+    if (!gender) {
       products = await Product.findAndCountAll({ limit, offset });
     } else {
       products = await Product.findAndCountAll({
-        where: { categoryId },
+        where: { gender },
         limit,
         offset,
       });
