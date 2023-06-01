@@ -1,0 +1,21 @@
+-- Table: public.basket_products
+
+-- DROP TABLE IF EXISTS public.basket_products;
+
+CREATE TABLE IF NOT EXISTS public.basket_products
+(
+    id integer NOT NULL DEFAULT nextval('basket_products_id_seq'::regclass),
+    "createdAt" timestamp with time zone NOT NULL,
+    "updatedAt" timestamp with time zone NOT NULL,
+    "basketId" integer,
+    CONSTRAINT basket_products_pkey PRIMARY KEY (id),
+    CONSTRAINT "basket_products_basketId_fkey" FOREIGN KEY ("basketId")
+        REFERENCES public.baskets (id) MATCH SIMPLE
+        ON UPDATE CASCADE
+        ON DELETE SET NULL
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.basket_products
+    OWNER to postgres;

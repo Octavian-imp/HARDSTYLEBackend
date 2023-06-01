@@ -46,19 +46,41 @@ class ProductController {
     }
   }
   async getAll(req, res) {
-    let { gender, limit, page } = req.query;
-    page = page || 1;
-    limit = limit || 12;
+    let { gender, limit, page, sort } = req.query;
+    page = page >= 1 ? page : 1;
+    limit = limit;
     let offset = page * limit - limit;
     let products;
+    let columnName;
+    let order = "asc";
+    if (sort === "ascname") {
+      columnName = "name";
+      order = "asc";
+    } else if (sort === "novelty") {
+      columnName = "createdAt";
+      order = "desc";
+    } else if (sort === "ascprice") {
+      columnName = "price";
+      order = "asc";
+    } else if (sort === "descprice") {
+      columnName = "price";
+      order = "desc";
+    }
     // получение товаров по полу. Было по 'CategoryId'
     if (!gender) {
-      products = await Product.findAndCountAll({ limit, offset });
+      products = await Product.findAndCountAll({
+        order: [[columnName, order]],
+        limit,
+        offset,
+        include: [{ model: ProductSizes, as: "sizes" }],
+      });
     } else {
       products = await Product.findAndCountAll({
         where: { gender },
+        order: [[columnName, order]],
         limit,
         offset,
+        include: [{ model: ProductSizes, as: "sizes" }],
       });
     }
     return res.json(products);
