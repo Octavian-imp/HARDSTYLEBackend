@@ -45,62 +45,76 @@ class ProductController {
       next(ApiError.badRequest(e.message));
     }
   }
-  async getAll(req, res) {
-    let { gender, limit, page, sort } = req.query;
-    page = page >= 1 ? page : 1;
-    limit = limit;
+  async getAll(req, res, next) {
+    let { gender, limit, page, sort } = req?.query;
+    page = page || 1;
+    limit = limit || 12;
     let offset = page * limit - limit;
     let products;
     let columnName;
     let order = "asc";
-    if (sort === "ascname") {
-      columnName = "name";
-      order = "asc";
-    } else if (sort === "novelty") {
-      columnName = "createdAt";
-      order = "desc";
-    } else if (sort === "ascprice") {
-      columnName = "price";
-      order = "asc";
-    } else if (sort === "descprice") {
-      columnName = "price";
-      order = "desc";
+    try {
+      if (sort === "ascname") {
+        columnName = "name";
+        order = "asc";
+      } else if (sort === "novelty") {
+        columnName = "createdAt";
+        order = "desc";
+      } else if (sort === "ascprice") {
+        columnName = "price";
+        order = "asc";
+      } else if (sort === "descprice") {
+        columnName = "price";
+        order = "desc";
+      } else {
+        columnName = "createdAt";
+        order = "desc";
+      }
+      if (!gender) {
+        products = await Product.findAndCountAll({
+          order: [[columnName, order]],
+          limit,
+          offset,
+          include: [{ model: ProductSizes, as: "sizes" }],
+        });
+      } else {
+        products = await Product.findAndCountAll({
+          where: { gender },
+          order: [[columnName, order]],
+          limit,
+          offset,
+          include: [{ model: ProductSizes, as: "sizes" }],
+        });
+      }
+      return res.json(products);
+    } catch (err) {
+      next(ApiError.badRequest(err.message));
     }
-    // получение товаров по полу. Было по 'CategoryId'
-    if (!gender) {
-      products = await Product.findAndCountAll({
-        order: [[columnName, order]],
-        limit,
-        offset,
+  }
+  async getAllCounts(req, res, next) {
+    try {
+      let products = await Product.findAll({
         include: [{ model: ProductSizes, as: "sizes" }],
       });
-    } else {
-      products = await Product.findAndCountAll({
-        where: { gender },
-        order: [[columnName, order]],
-        limit,
-        offset,
-        include: [{ model: ProductSizes, as: "sizes" }],
-      });
+      return res.json(products);
+    } catch (err) {
+      next(ApiError.badRequest(err.message));
     }
-    return res.json(products);
   }
-  async getAllCounts(req, res) {
-    let products = await Product.findAll({
-      include: [{ model: ProductSizes, as: "sizes" }],
-    });
-    return res.json(products);
-  }
-  async getOne(req, res) {
-    const { id } = req.params;
-    const product = await Product.findOne({
-      where: { id },
-      include: [
-        { model: ProductsInfo, as: "info" },
-        { model: ProductSizes, as: "sizes" },
-      ],
-    });
-    return res.json(product);
+  async getOne(req, res, next) {
+    try {
+      const { id } = req.params;
+      const product = await Product.findOne({
+        where: { id },
+        include: [
+          { model: ProductsInfo, as: "info" },
+          { model: ProductSizes, as: "sizes" },
+        ],
+      });
+      return res.json(product);
+    } catch (error) {
+      next(ApiError.badRequest(error.message));
+    }
   }
 }
 module.exports = new ProductController();
