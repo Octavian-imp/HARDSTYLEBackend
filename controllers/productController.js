@@ -2,6 +2,7 @@ const uuid = require("uuid");
 const path = require("path");
 const { Product, ProductsInfo, ProductSizes } = require("../models/models");
 const ApiError = require("../errors/ApiError");
+const categoryId = require("../global/categoryId");
 
 class ProductController {
   async create(req, res, next) {
@@ -46,7 +47,7 @@ class ProductController {
     }
   }
   async getAll(req, res, next) {
-    let { gender, limit, page, sort } = req?.query;
+    let { gender, limit, page, sort, isAccessories } = req?.query;
     page = page || 1;
     limit = limit || 12;
     let offset = page * limit - limit;
@@ -76,10 +77,13 @@ class ProductController {
           limit,
           offset,
           include: [{ model: ProductSizes, as: "sizes" }],
+          where: isAccessories && { categoryId: 1 },
         });
       } else {
         products = await Product.findAndCountAll({
-          where: { gender },
+          where: {
+            gender,
+          },
           order: [[columnName, order]],
           limit,
           offset,

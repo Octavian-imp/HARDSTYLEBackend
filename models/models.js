@@ -2,6 +2,7 @@ const sequelize = require("../db");
 const { DataTypes } = require("sequelize");
 const payment_methods = require("../global/payment_methods");
 const status_support_ticket = require("../global/status_support_ticket");
+const status_order = require("../global/status_order");
 
 const User = sequelize.define("user", {
   id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
@@ -57,7 +58,15 @@ const Order = sequelize.define("order", {
     type: DataTypes.DOUBLE,
     defaultValue: 0,
   },
-  status: { type: DataTypes.STRING, allowNull: false },
+  status: {
+    type: DataTypes.ENUM(
+      status_order.created,
+      status_order.enRoute,
+      status_order.completed,
+      status_order.canceled
+    ),
+    allowNull: false,
+  },
   payment_method: {
     type: DataTypes.ENUM(payment_methods.CARD, payment_methods.CASH),
     allowNull: false,

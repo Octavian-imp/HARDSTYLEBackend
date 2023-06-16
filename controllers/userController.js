@@ -55,7 +55,7 @@ class UserController {
   async update(req, res, next) {
     try {
       const { id, newUsername, birthDay } = req.body;
-      if (req.files.length > 0) {
+      if (req.files?.length > 0) {
         const { newAvatar } = req.files;
         const fileName = uuid.v4() + ".jpg";
         newAvatar.mv(path.resolve(__dirname, "..", "static", fileName));
@@ -124,11 +124,12 @@ class UserController {
       );
       return res.json({ token });
     } catch (error) {
-      return next(ApiError.badRequest(error.message));
+      return next(ApiError.badRequest(error?.message));
     }
   }
   async check(req, res, next) {
     try {
+      console.log("\n\n\n\n\n" + req.user + "\n\n\n\n\n");
       const token = generateJwt(
         req.user.id,
         req.user.email,

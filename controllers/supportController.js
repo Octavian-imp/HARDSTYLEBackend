@@ -6,7 +6,7 @@ const { Support_ticket, Support_message } = require("../models/models");
 class SupportController {
   async create(req, res, next) {
     try {
-      const { theme, text } = req.body;
+      const { theme, message } = req.body;
       const user = req.user;
       const isExist = await Support_ticket.findOne({
         where: {
@@ -26,7 +26,7 @@ class SupportController {
       await Support_message.create({
         supportTicketId: ticket.id,
         userId: user.id,
-        text,
+        text: message,
         isAdmin,
       });
       return res.json({ ticket });
@@ -34,28 +34,46 @@ class SupportController {
       next(ApiError);
     }
   }
-  async getOne(req, res, next) {
+  async getTicketMessages(req, res, next) {
     try {
-      const { id } = req.params;
+      const userId = req.user.id;
+      const { id } = req.query;
       const messages = await Support_message.findAll({
         where: {
           supportTicketId: id,
+          userId,
         },
       });
-      return res.json({ messages });
+      return res.json(messages);
+    } catch (error) {
+      next(ApiError.badRequest(error.message));
+    }
+  }
+  async addNewMessage(req, res, next) {
+    try {
+      const user = req.user;
+      const { message: text, ticketId } = req.body;
+      const isAdmin = user.role === "ADMIN";
+      const newMessage = await Support_message.create({
+        supportTicketId: ticketId,
+        userId: user.id,
+        text,
+        isAdmin,
+      });
+      return res.json({ response: "сообщение отправлено" });
     } catch (error) {
       next(ApiError.badRequest(error.message));
     }
   }
   async getAll(req, res, next) {
     try {
-      const user = req.user;
+      const userId = req.user.id;
       const tickets = await Support_ticket.findAll({
         where: {
-          userId: user.id,
+          userId,
         },
       });
-      return res.json({ tickets });
+      return res.json(tickets);
     } catch (error) {
       next(ApiError.badRequest(error.message));
     }

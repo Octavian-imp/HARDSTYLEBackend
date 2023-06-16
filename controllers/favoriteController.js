@@ -6,9 +6,9 @@ class FavoriteController {
     try {
       const userId = req.user.id;
       const { productId } = req.query;
-      const isExist = await Favorite.findOne({ where: { productId, userId } });
+      const isExist = await Favorite.findOne({ where: { userId, productId } });
       if (isExist) {
-        return next(ApiError.badRequest("товар уже в избранном"));
+        return next(ApiError.manyRequests("товар уже в избранном"));
       }
       const favorite = await Favorite.create({
         productId,
@@ -38,7 +38,7 @@ class FavoriteController {
         where: { userId },
         include: [{ model: Product, right: true }],
       });
-      return res.json({ favorites });
+      return res.json(favorites);
     } catch (error) {
       next(ApiError.badRequest(error.message));
     }
