@@ -129,14 +129,19 @@ class UserController {
   }
   async check(req, res, next) {
     try {
-      console.log("\n\n\n\n\n" + req.user + "\n\n\n\n\n");
+      const userId = req.user.id;
+      const user = await User.findOne({
+        where: {
+          id: userId,
+        },
+      });
       const token = generateJwt(
-        req.user.id,
-        req.user.email,
-        req.user.role,
-        req.user.username,
-        req.user.avatar,
-        req.user.birthDay
+        user.id,
+        user.email,
+        user.role,
+        user.username,
+        user.avatar,
+        user.birthDay
       );
       return res.json({ token });
     } catch (error) {

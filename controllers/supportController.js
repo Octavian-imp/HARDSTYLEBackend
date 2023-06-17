@@ -67,12 +67,17 @@ class SupportController {
   }
   async getAll(req, res, next) {
     try {
-      const userId = req.user.id;
-      const tickets = await Support_ticket.findAll({
-        where: {
-          userId,
-        },
-      });
+      const user = req.user;
+      let tickets;
+      if (user.role === "ADMIN") {
+        tickets = await Support_ticket.findAll();
+      } else {
+        tickets = await Support_ticket.findAll({
+          where: {
+            userId: user.id,
+          },
+        });
+      }
       return res.json(tickets);
     } catch (error) {
       next(ApiError.badRequest(error.message));

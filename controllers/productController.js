@@ -47,7 +47,8 @@ class ProductController {
     }
   }
   async getAll(req, res, next) {
-    let { gender, limit, page, sort, isAccessories } = req?.query;
+    let { gender, limit, page, sort, isAccessories, minCost, maxCost, sizes } =
+      req?.query;
     page = page || 1;
     limit = limit || 12;
     let offset = page * limit - limit;
@@ -89,6 +90,16 @@ class ProductController {
           offset,
           include: [{ model: ProductSizes, as: "sizes" }],
         });
+      }
+      if (minCost) {
+        products.rows = products.rows.filter(
+          (product) => product.price > Number(minCost)
+        );
+      }
+      if (maxCost) {
+        products.rows = products.rows.filter(
+          (product) => product.price < Number(maxCost)
+        );
       }
       return res.json(products);
     } catch (err) {
